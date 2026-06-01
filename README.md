@@ -2,9 +2,52 @@
 
 An interactive map tracking my progress through all 36 legs of the [Reno-Tahoe Odyssey](https://renotahoeodyssey.com/) relay race.
 
-**Live site:** [https://hafegit.github.io/seans-rto-journey/](https://hafegit.github.io/seans-rto-journey/)
+**🌐 Live site:** [https://hafegit.github.io/seans-rto-journey/](https://hafegit.github.io/seans-rto-journey/)
 
-## Progress
+---
+
+## How to Update After a Race
+
+**The only file you need to edit is `index.html`.** No build tools, no terminal commands needed — just edit the file on GitHub.com and save.
+
+### Step-by-step:
+
+1. Go to [index.html on GitHub](https://github.com/hafegit/seans-rto-journey/blob/main/index.html)
+2. Click the **pencil icon** (✏️) to edit
+3. Find the `completedLegs` array (near the top of the `<script>` section, around line 340 — it's clearly marked with a big comment block)
+4. Add your new leg(s) to the array:
+
+```javascript
+const completedLegs = [
+    // ... existing entries ...
+    { leg: 7,  year: 2022, pace: "7:58/mi" },
+    { leg: 19, year: 2022, pace: "9:43/mi" },
+    // ↓ ADD NEW ONES HERE ↓
+    { leg: 5,  year: 2027, pace: "7:15/mi" },
+    { leg: 17, year: 2027, pace: "8:02/mi" },
+    { leg: 29, year: 2027, pace: "7:45/mi" }
+];
+```
+
+5. Click **"Commit changes"**
+6. Wait ~1 minute for GitHub Pages to rebuild
+7. Refresh the live site — done! ✅
+
+### Format for each entry:
+
+```javascript
+{ leg: LEG_NUMBER, year: YEAR, pace: "M:SS/mi" }
+```
+
+- `leg` — The leg number (1–36)
+- `year` — The year you ran it (e.g., `2027`)
+- `pace` — Your average pace as `"M:SS/mi"` (e.g., `"7:08/mi"`)
+
+That's it. The progress bar, map highlighting, and info panels all update automatically.
+
+---
+
+## Current Progress
 
 | Year | Legs Run | Paces |
 |------|----------|-------|
@@ -15,33 +58,9 @@ An interactive map tracking my progress through all 36 legs of the [Reno-Tahoe O
 
 **12 of 36 legs completed** (33%)
 
-## How to Update After Future Races
+---
 
-### Adding a new completed leg
-
-1. Open `index.html`
-2. Find the `completedLegs` array (around line 220, clearly marked with a comment)
-3. Add a new entry:
-
-```javascript
-const completedLegs = [
-    // ... existing entries ...
-    { leg: 5,  year: 2027, pace: "7:15/mi" },  // ← add new ones here
-];
-```
-
-4. Commit and push — GitHub Pages will update automatically.
-
-### Data format
-
-Each completed leg entry has three fields:
-- `leg` — The leg number (1–36)
-- `year` — The year you ran it
-- `pace` — Your average pace in `"M:SS/mi"` format
-
-### Leg reference
-
-The full course data is also stored in `data/legs.json` for reference. The website itself uses the inline data in `index.html` for simplicity (no build step needed).
+## Leg Reference
 
 | Leg | Miles | Rating | Description |
 |-----|-------|--------|-------------|
@@ -88,18 +107,35 @@ The full course data is also stored in `data/legs.json` for reference. The websi
 - **MC** — More Challenging
 - **MD** — Most Difficult (steepest climbs)
 
+---
+
+## Project Structure
+
+```
+seans-rto-journey/
+├── index.html          ← THE ONLY FILE YOU NEED TO EDIT
+├── data/
+│   ├── routes.js       ← GPS coordinates for all 36 legs (auto-generated from GPX)
+│   ├── elevations.js   ← Elevation data for profile charts (auto-generated from GPX)
+│   ├── legs.json       ← Leg metadata reference file
+│   └── gpx/            ← Raw GPX files from Garmin Connect (source of truth)
+└── README.md           ← This file
+```
+
 ## Tech Stack
 
-- Pure HTML/CSS/JavaScript (no build step)
-- [Leaflet.js](https://leafletjs.com/) for interactive mapping
+- Pure HTML/CSS/JavaScript — no build step, no dependencies to install
+- [Leaflet.js](https://leafletjs.com/) for interactive mapping (loaded from CDN)
 - Esri satellite imagery tiles
-- Hosted on GitHub Pages
+- Canvas-drawn elevation profile charts
+- Hosted on GitHub Pages (auto-deploys on push)
 
 ## Local Development
 
-Just open `index.html` in a browser, or serve it locally:
+Just open `index.html` in a browser, or:
 
 ```bash
+cd seans-rto-journey
 python3 -m http.server 8000
-# Then visit http://localhost:8000
+# Visit http://localhost:8000
 ```
