@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx creator="Garmin Connect" version="1.1"
+  xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/11.xsd"
+  xmlns:ns3="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+  xmlns="http://www.topografix.com/GPX/1/1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+  <metadata>
+    <name>RTO Leg 16</name>
+    <link href="connect.garmin.com">
+      <text>Garmin Connect</text>
+    </link>
+    <time>2019-05-30T17:02:20.000Z</time>
+  </metadata>
+  <trk>
+    <name>RTO Leg 16</name>
+    <trkseg>
+      <trkpt lat="38.93330312334001" lon="-120.05143837071955">
+        <ele>1913.0</ele>
+      </trkpt>
+      <trkpt lat="38.93394995480776" lon="-120.04755528643727">
+        <ele>1913.0</ele>
+      </trkpt>
+      <trkpt lat="38.9345661085099" lon="-120.04208726808429">
+        <ele>1908.0</ele>
+      </trkpt>
+      <trkpt lat="38.93413636833429" lon="-120.04026051610708">
+        <ele>1907.0</ele>
+      </trkpt>
+      <trkpt lat="38.93356597982347" lon="-120.0386811979115">
+        <ele>1905.0</ele>
+      </trkpt>
+      <trkpt lat="38.93292962573469" lon="-120.03392413258553">
+        <ele>1904.0</ele>
+      </trkpt>
+      <trkpt lat="38.93079995177686" lon="-120.03119255416095">
+        <ele>1908.0</ele>
+      </trkpt>
+      <trkpt lat="38.930364679545164" lon="-120.030862307176">
+        <ele>1908.0</ele>
+      </trkpt>
+      <trkpt lat="38.9265654142946" lon="-120.03017289564013">
+        <ele>1911.0</ele>
+      </trkpt>
+      <trkpt lat="38.92562345601618" lon="-120.02934509888291">
+        <ele>1909.0</ele>
+      </trkpt>
+      <trkpt lat="38.92284628003836" lon="-120.02529764547944">
+        <ele>1904.0</ele>
+      </trkpt>
+      <trkpt lat="38.92158966511488" lon="-120.02085758373141">
+        <ele>1910.0</ele>
+      </trkpt>
+      <trkpt lat="38.92183257266879" lon="-120.02058768644929">
+        <ele>1909.0</ele>
+      </trkpt>
+      <trkpt lat="38.92315708100796" lon="-120.02063428983092">
+        <ele>1905.0</ele>
+      </trkpt>
+      <trkpt lat="38.9241704531014" lon="-120.0204423442483">
+        <ele>1904.0</ele>
+      </trkpt>
+      <trkpt lat="38.92700169235468" lon="-120.02049221657217">
+        <ele>1899.0</ele>
+      </trkpt>
+      <trkpt lat="38.92816669307649" lon="-120.02007664181292">
+        <ele>1897.0</ele>
+      </trkpt>
+      <trkpt lat="38.92835880629718" lon="-120.0181232392788">
+        <ele>1900.0</ele>
+      </trkpt>
+      <trkpt lat="38.92801674082875" lon="-120.01576934941113">
+        <ele>1903.0</ele>
+      </trkpt>
+      <trkpt lat="38.927933340892196" lon="-120.01247165724635">
+        <ele>1901.0</ele>
+      </trkpt>
+      <trkpt lat="38.92819644883275" lon="-120.01154570840299">
+        <ele>1899.0</ele>
+      </trkpt>
+      <trkpt lat="38.928385293111205" lon="-120.0093228276819">
+        <ele>1896.0</ele>
+      </trkpt>
+      <trkpt lat="38.928818218410015" lon="-120.0072902161628">
+        <ele>1888.0</ele>
+      </trkpt>
+      <trkpt lat="38.92957443371415" lon="-120.00514813698828">
+        <ele>1890.0</ele>
+      </trkpt>
+      <trkpt lat="38.929876601323485" lon="-120.00469207763672">
+        <ele>1891.0</ele>
+      </trkpt>
+      <trkpt lat="38.93055662512779" lon="-120.00499282032251">
+        <ele>1895.0</ele>
+      </trkpt>
+      <trkpt lat="38.93075980246067" lon="-120.00465117394924">
+        <ele>1894.0</ele>
+      </trkpt>
+      <trkpt lat="38.93050532788038" lon="-120.00389043241739">
+        <ele>1894.0</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

@@ -6,67 +6,103 @@
     <title>Sean's RTO Journey</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0e13;
+            background: #111;
             color: #e7e9ea;
             overflow: hidden;
             height: 100vh;
             height: 100dvh;
         }
 
+        /* ===== HEADER ===== */
         #header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(10, 14, 19, 0.88);
+            background: rgba(15, 20, 25, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255,255,255,0.06);
-            padding: 14px 20px;
+            padding: 12px 24px 8px;
+        }
+
+        .header-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 10px;
         }
 
         #header h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #f0f0f0;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #47aa43, #1ebbf0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
         }
 
         #header .subtitle {
             font-size: 0.72rem;
-            color: #6b7280;
+            color: #9ca3af;
             font-weight: 400;
-            margin-top: 1px;
+            margin-top: 2px;
+            letter-spacing: 0.03em;
         }
 
-        #progress-badge {
+        .header-logo {
+            height: 40px;
+            opacity: 0.85;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        #progress-bar-container {
+            width: 100%;
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(16, 185, 129, 0.08);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 0.78rem;
+            gap: 12px;
+        }
+
+        #progress-bar-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        #progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #47aa43, #1ebbf0);
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(71, 170, 67, 0.4);
+        }
+
+        #progress-label {
+            font-size: 0.72rem;
+            color: #9ca3af;
+            white-space: nowrap;
             font-weight: 500;
-            color: #10b981;
         }
 
-        #progress-badge .count {
+        #progress-label span {
+            color: #47aa43;
             font-weight: 700;
-            font-size: 0.9rem;
         }
 
+        /* ===== MAP ===== */
         #map {
             position: fixed;
             top: 0;
@@ -76,35 +112,35 @@
             z-index: 1;
         }
 
-        /* Dark overlay on the satellite imagery */
+        /* Light overlay - just enough to mute satellite without making it too dark */
         .dark-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(5, 10, 18, 0.55);
+            background: rgba(10, 15, 25, 0.35);
             z-index: 2;
             pointer-events: none;
         }
 
-        /* Legend */
+        /* ===== LEGEND ===== */
         #legend {
             position: fixed;
             bottom: 20px;
             left: 20px;
             z-index: 1000;
-            background: rgba(10, 14, 19, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(15, 20, 25, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 14px 18px;
             font-size: 0.75rem;
         }
 
         #legend h3 {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: #6b7280;
@@ -117,33 +153,34 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 6px;
-            color: #9ca3af;
+            color: #d1d5db;
         }
 
         .legend-line {
             width: 28px;
-            height: 4px;
-            border-radius: 2px;
+            height: 5px;
+            border-radius: 3px;
         }
 
         .legend-line.completed { 
-            background: #10b981; 
-            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+            background: #47aa43; 
+            box-shadow: 0 0 8px rgba(71, 170, 67, 0.6);
         }
         .legend-line.remaining { 
-            background: #4b5563; 
+            background: #a0aec0;
+            opacity: 0.8;
         }
 
-        /* Info Panel */
+        /* ===== INFO PANEL ===== */
         #info-panel {
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            background: rgba(10, 14, 19, 0.95);
+            background: rgba(15, 20, 25, 0.94);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px;
             padding: 22px 24px;
             min-width: 290px;
@@ -173,7 +210,6 @@
             font-size: 1.15rem;
             font-weight: 600;
             margin-bottom: 14px;
-            letter-spacing: -0.01em;
             color: #f9fafb;
         }
 
@@ -184,8 +220,8 @@
         }
 
         .stat-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.04);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 10px;
             padding: 10px 12px;
         }
@@ -205,10 +241,10 @@
             color: #e5e7eb;
         }
 
-        .stat-item .value.pace { color: #10b981; }
-        .stat-item .value.year { color: #60a5fa; }
+        .stat-item .value.pace { color: #47aa43; }
+        .stat-item .value.year { color: #1ebbf0; }
 
-        #info-panel .rating-badge {
+        .rating-badge {
             display: inline-block;
             padding: 3px 8px;
             border-radius: 5px;
@@ -216,18 +252,18 @@
             font-weight: 600;
         }
 
-        .rating-E { background: rgba(16, 185, 129, 0.12); color: #34d399; }
-        .rating-M { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
-        .rating-MC { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
-        .rating-MD { background: rgba(244, 63, 94, 0.12); color: #fb7185; }
+        .rating-E { background: rgba(71, 170, 67, 0.15); color: #6ee66a; }
+        .rating-M { background: rgba(30, 187, 240, 0.15); color: #60c8f0; }
+        .rating-MC { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .rating-MD { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
 
         .completed-badge {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            color: #10b981;
+            background: rgba(71, 170, 67, 0.12);
+            border: 1px solid rgba(71, 170, 67, 0.3);
+            color: #47aa43;
             padding: 5px 12px;
             border-radius: 14px;
             font-size: 0.7rem;
@@ -239,9 +275,9 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: rgba(107, 114, 128, 0.1);
-            border: 1px solid rgba(107, 114, 128, 0.2);
-            color: #6b7280;
+            background: rgba(160, 174, 192, 0.1);
+            border: 1px solid rgba(160, 174, 192, 0.2);
+            color: #a0aec0;
             padding: 5px 12px;
             border-radius: 14px;
             font-size: 0.7rem;
@@ -260,105 +296,78 @@
             font-size: 1.3rem;
             padding: 4px;
             line-height: 1;
-            transition: color 0.15s;
         }
 
         #close-panel:hover { color: #e7e9ea; }
 
-        /* Mobile adjustments */
+        /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            #header {
-                padding: 10px 14px;
-            }
-            #header h1 { font-size: 0.95rem; }
-            #progress-badge { padding: 5px 10px; font-size: 0.7rem; }
-            
-            #legend {
-                bottom: 12px;
-                left: 12px;
-                padding: 10px 14px;
-            }
-
+            #header { padding: 10px 14px 6px; }
+            #header h1 { font-size: 1.6rem; }
+            .header-logo { height: 30px; }
+            #legend { bottom: 12px; left: 12px; padding: 10px 14px; }
             #info-panel {
-                bottom: 0;
-                right: 0;
-                left: 0;
+                bottom: 0; right: 0; left: 0;
                 max-width: none;
                 border-radius: 16px 16px 0 0;
                 transform: translateY(100%);
             }
-
-            #info-panel.visible {
-                transform: translateY(0);
-            }
+            #info-panel.visible { transform: translateY(0); }
         }
 
-        /* Leaflet overrides */
-        .leaflet-control-zoom {
-            border: none !important;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
-        }
-        .leaflet-control-zoom a {
-            background: rgba(10, 14, 19, 0.92) !important;
-            color: #d1d5db !important;
-            border: 1px solid rgba(255,255,255,0.08) !important;
-            backdrop-filter: blur(8px) !important;
-        }
-        .leaflet-control-zoom a:hover {
-            background: rgba(20, 28, 38, 0.95) !important;
-            color: #f9fafb !important;
-        }
-        .leaflet-control-attribution {
-            background: rgba(10, 14, 19, 0.7) !important;
-            color: #6b7280 !important;
-            font-size: 10px !important;
-        }
-        .leaflet-control-attribution a {
-            color: #9ca3af !important;
-        }
+        /* ===== LEAFLET OVERRIDES ===== */
+        .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important; }
+        .leaflet-control-zoom a { background: rgba(15, 20, 25, 0.9) !important; color: #d1d5db !important; border: 1px solid rgba(255,255,255,0.08) !important; }
+        .leaflet-control-zoom a:hover { background: rgba(25, 35, 45, 0.95) !important; }
+        .leaflet-control-attribution { background: rgba(15, 20, 25, 0.6) !important; color: #6b7280 !important; font-size: 10px !important; }
+        .leaflet-control-attribution a { color: #9ca3af !important; }
 
-        /* Leg number markers */
+        /* ===== LEG MARKERS ===== */
         .leg-marker {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            font-size: 9px;
+            font-size: 9.5px;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
-            border: 2px solid;
+            border: 2.5px solid;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease;
         }
 
-        .leg-marker:hover {
-            transform: scale(1.4);
-        }
+        .leg-marker:hover { transform: scale(1.4); }
 
         .leg-marker.completed {
-            background: #10b981;
-            border-color: #10b981;
+            background: #47aa43;
+            border-color: #5cd658;
             color: #fff;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 12px rgba(71, 170, 67, 0.7), 0 0 24px rgba(71, 170, 67, 0.3);
         }
 
         .leg-marker.remaining {
-            background: rgba(10, 14, 19, 0.8);
-            border-color: #4b5563;
-            color: #9ca3af;
+            background: rgba(20, 25, 35, 0.75);
+            border-color: #a0aec0;
+            color: #d1d5db;
         }
     </style>
 </head>
 <body>
     <div id="header">
-        <div>
-            <h1>Sean's RTO Journey</h1>
-            <span class="subtitle">Reno-Tahoe Odyssey • 178-Mile Relay</span>
+        <div class="header-top">
+            <div>
+                <h1>Sean's RTO Journey</h1>
+                <span class="subtitle">Reno-Tahoe Odyssey • 178-Mile Relay</span>
+            </div>
+            <img class="header-logo" src="https://renotahoeodyssey.com/wp-content/uploads/2026/03/178-RTO-Odyssey_out-3.5.26.png" alt="RTO Logo">
         </div>
-        <div id="progress-badge">
-            <span class="count">12</span> / 36 legs
+        <div id="progress-bar-container">
+            <div id="progress-bar-track">
+                <div id="progress-bar-fill"></div>
+            </div>
+            <div id="progress-label"><span id="progress-count">12</span> of 36 legs completed</div>
         </div>
     </div>
 
@@ -405,7 +414,7 @@
     ];
 
     // ============================================================
-    // LEG DATA (from RTO course info)
+    // LEG DATA
     // ============================================================
     const legs = [
         { leg: 1, miles: 4.9, rating: "E", runner: 1, description: "Reno to Verdi" },
@@ -446,18 +455,8 @@
         { leg: 36, miles: 4.2, rating: "M", runner: 12, description: "Midtown Reno to Finish" }
     ];
 
-    // Approximate coordinates for legs 14-36 (no GPX data yet)
+    // Fallback coordinates for legs without GPX data
     const fallbackCoordinates = {
-        14: [[38.9570, -119.9600], [38.9580, -119.9500], [38.9590, -119.9400], [38.9600, -119.9300], [38.9620, -119.9200]],
-        15: [[38.9620, -119.9200], [38.9700, -119.9300], [38.9800, -119.9400], [38.9900, -119.9450]],
-        16: [[38.9900, -119.9450], [38.9950, -119.9470], [39.0050, -119.9490], [39.0100, -119.9500]],
-        17: [[39.0100, -119.9500], [39.0180, -119.9470], [39.0250, -119.9440], [39.0350, -119.9400]],
-        18: [[39.0350, -119.9400], [39.0500, -119.9350], [39.0650, -119.9300], [39.0800, -119.9260], [39.0900, -119.9250]],
-        19: [[39.0900, -119.9250], [39.0980, -119.9220], [39.1050, -119.9150], [39.1100, -119.9080], [39.1200, -119.8950]],
-        20: [[39.1200, -119.8950], [39.1300, -119.8800], [39.1400, -119.8600], [39.1550, -119.8200], [39.1650, -119.7700]],
-        21: [[39.1650, -119.7700], [39.1680, -119.7650], [39.1700, -119.7600], [39.1750, -119.7500]],
-        22: [[39.1750, -119.7500], [39.1600, -119.7550], [39.1400, -119.7650], [39.1100, -119.7800], [39.0800, -119.8000], [39.0000, -119.8500]],
-        23: [[39.0000, -119.8500], [38.9900, -119.8450], [38.9750, -119.8350], [38.9600, -119.8200], [38.9500, -119.8000]],
         24: [[38.9500, -119.8000], [38.9550, -119.7900], [38.9600, -119.7800], [38.9700, -119.7700]],
         25: [[38.9700, -119.7700], [38.9750, -119.7680], [38.9800, -119.7650], [38.9900, -119.7600]],
         26: [[38.9900, -119.7600], [39.0050, -119.7450], [39.0200, -119.7300], [39.0400, -119.7100], [39.0600, -119.6800]],
@@ -476,121 +475,72 @@
     // Build lookup
     const completedMap = {};
     completedLegs.forEach(c => { completedMap[c.leg] = c; });
-
-    // Rating labels
-    const ratingLabels = {
-        "E": "Easy",
-        "M": "Moderate",
-        "MC": "More Challenging",
-        "MD": "Most Difficult"
-    };
+    const ratingLabels = { "E": "Easy", "M": "Moderate", "MC": "More Challenging", "MD": "Most Difficult" };
 
     // ============================================================
-    // MAP INITIALIZATION
+    // MAP
     // ============================================================
-    const map = L.map('map', {
-        zoomControl: true,
-        attributionControl: true,
-        zoomSnap: 0.25
-    });
+    const map = L.map('map', { zoomControl: true, attributionControl: true, zoomSnap: 0.25 });
 
-    // Satellite tile layer (Esri) - will be muted by CSS overlay
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 18
+        attribution: 'Tiles &copy; Esri', maxZoom: 18
     }).addTo(map);
 
-    // Subtle road labels
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 18,
-        opacity: 0.35
+        maxZoom: 18, opacity: 0.4
     }).addTo(map);
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 18,
-        opacity: 0.45
+        maxZoom: 18, opacity: 0.5
     }).addTo(map);
 
     // ============================================================
-    // GET COORDINATES FOR A LEG (GPX if available, fallback otherwise)
+    // DRAW LEGS
     // ============================================================
     function getLegCoords(legNum) {
-        if (gpxRoutes[legNum]) {
-            return gpxRoutes[legNum];
-        }
+        if (typeof gpxRoutes !== 'undefined' && gpxRoutes[legNum]) return gpxRoutes[legNum];
         return fallbackCoordinates[legNum] || [];
     }
 
-    // ============================================================
-    // DRAW COURSE LEGS
-    // ============================================================
     const allCoords = [];
 
     legs.forEach(legData => {
         const coords = getLegCoords(legData.leg);
         if (!coords || coords.length === 0) return;
-
         const isCompleted = !!completedMap[legData.leg];
         allCoords.push(...coords);
 
-        // Glow layer for completed legs (drawn first, underneath)
+        // Glow layers for completed
         if (isCompleted) {
-            L.polyline(coords, {
-                color: '#10b981',
-                weight: 14,
-                opacity: 0.12,
-                lineCap: 'round',
-                lineJoin: 'round',
-                interactive: false
-            }).addTo(map);
-
-            L.polyline(coords, {
-                color: '#10b981',
-                weight: 8,
-                opacity: 0.25,
-                lineCap: 'round',
-                lineJoin: 'round',
-                interactive: false
-            }).addTo(map);
+            L.polyline(coords, { color: '#47aa43', weight: 18, opacity: 0.12, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+            L.polyline(coords, { color: '#47aa43', weight: 10, opacity: 0.3, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
         }
 
-        // Main route line
+        // Main line - THICK and BRIGHT
         const polyline = L.polyline(coords, {
-            color: isCompleted ? '#10b981' : '#6b7280',
-            weight: isCompleted ? 4.5 : 2.5,
-            opacity: isCompleted ? 1 : 0.5,
+            color: isCompleted ? '#5cd658' : '#c8d6e5',
+            weight: isCompleted ? 6 : 4,
+            opacity: isCompleted ? 1 : 0.75,
             lineCap: 'round',
             lineJoin: 'round'
         }).addTo(map);
 
-        // Calculate midpoint for marker
+        // Marker at midpoint
         const midIdx = Math.floor(coords.length / 2);
         const midPoint = coords[midIdx];
-
-        // Create numbered marker
         const markerHtml = `<div class="leg-marker ${isCompleted ? 'completed' : 'remaining'}">${legData.leg}</div>`;
         const marker = L.marker(midPoint, {
-            icon: L.divIcon({
-                html: markerHtml,
-                className: '',
-                iconSize: [22, 22],
-                iconAnchor: [11, 11]
-            }),
+            icon: L.divIcon({ html: markerHtml, className: '', iconSize: [24, 24], iconAnchor: [12, 12] }),
             zIndexOffset: isCompleted ? 100 : 0
         }).addTo(map);
 
-        // Click handlers
         marker.on('click', () => showLegInfo(legData.leg));
         polyline.on('click', () => showLegInfo(legData.leg));
     });
 
-    // Fit map to show entire course
+    // Fit bounds to course
     if (allCoords.length > 0) {
-        const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { 
-            padding: [60, 60],
-            maxZoom: 11
-        });
+        map.fitBounds(L.latLngBounds(allCoords), { padding: [80, 80], maxZoom: 11 });
     }
 
     // ============================================================
@@ -598,48 +548,36 @@
     // ============================================================
     const infoPanel = document.getElementById('info-panel');
     const panelContent = document.getElementById('panel-content');
-    const closeBtn = document.getElementById('close-panel');
-
-    closeBtn.addEventListener('click', () => {
-        infoPanel.classList.remove('visible');
-    });
-
-    map.on('click', () => {
-        infoPanel.classList.remove('visible');
-    });
+    document.getElementById('close-panel').addEventListener('click', () => infoPanel.classList.remove('visible'));
+    map.on('click', () => infoPanel.classList.remove('visible'));
 
     function showLegInfo(legNum) {
         const legData = legs.find(l => l.leg === legNum);
         const completed = completedMap[legNum];
-
         let html = '';
-
-        if (completed) {
-            html += `<div class="completed-badge">✓ Completed</div>`;
-        } else {
-            html += `<div class="not-completed-badge">○ Not yet run</div>`;
-        }
-
+        html += completed
+            ? `<div class="completed-badge">✓ Completed</div>`
+            : `<div class="not-completed-badge">○ Not yet run</div>`;
         html += `<div class="leg-number">Leg ${legNum} • Runner #${legData.runner}</div>`;
         html += `<div class="leg-title">${legData.description}</div>`;
-
         html += `<div class="stats-grid">`;
         html += `<div class="stat-item"><div class="label">Distance</div><div class="value">${legData.miles} mi</div></div>`;
         html += `<div class="stat-item"><div class="label">Difficulty</div><div class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></div></div>`;
-
         if (completed) {
             html += `<div class="stat-item"><div class="label">Pace</div><div class="value pace">${completed.pace}</div></div>`;
             html += `<div class="stat-item"><div class="label">Year</div><div class="value year">${completed.year}</div></div>`;
         }
-
         html += `</div>`;
-
         panelContent.innerHTML = html;
         infoPanel.classList.add('visible');
     }
 
-    // Update progress count
-    document.querySelector('#progress-badge .count').textContent = completedLegs.length;
+    // ============================================================
+    // PROGRESS BAR
+    // ============================================================
+    const count = completedLegs.length;
+    document.getElementById('progress-count').textContent = count;
+    document.getElementById('progress-bar-fill').style.width = `${(count / 36) * 100}%`;
     </script>
 </body>
 </html>
