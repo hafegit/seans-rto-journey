@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sean's RTO Journey</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f1419;
+            color: #e7e9ea;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(15, 20, 25, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        #header .subtitle {
+            font-size: 0.75rem;
+            color: #71767b;
+            font-weight: 400;
+        }
+
+        #progress-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(29, 155, 240, 0.1);
+            border: 1px solid rgba(29, 155, 240, 0.3);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1d9bf0;
+        }
+
+        #progress-badge .count {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        #map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        /* Legend */
+        #legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(15, 20, 25, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 0.75rem;
+        }
+
+        #legend h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #71767b;
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .legend-line {
+            width: 24px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .legend-line.completed { background: #00ba7c; }
+        .legend-line.remaining { background: #71767b; opacity: 0.6; }
+
+        /* Info Panel */
+        #info-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            min-width: 280px;
+            max-width: 340px;
+            transform: translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #info-panel.visible {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #info-panel .leg-number {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #71767b;
+            margin-bottom: 4px;
+        }
+
+        #info-panel .leg-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        #info-panel .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .stat-item .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #71767b;
+            margin-bottom: 2px;
+        }
+
+        .stat-item .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .stat-item .value.pace { color: #00ba7c; }
+        .stat-item .value.year { color: #1d9bf0; }
+
+        #info-panel .rating-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .rating-E { background: rgba(0, 186, 124, 0.15); color: #00ba7c; }
+        .rating-M { background: rgba(29, 155, 240, 0.15); color: #1d9bf0; }
+        .rating-MC { background: rgba(255, 212, 0, 0.15); color: #ffd400; }
+        .rating-MD { background: rgba(249, 24, 128, 0.15); color: #f91880; }
+
+        .completed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 186, 124, 0.12);
+            border: 1px solid rgba(0, 186, 124, 0.3);
+            color: #00ba7c;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .not-completed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(113, 118, 123, 0.12);
+            border: 1px solid rgba(113, 118, 123, 0.3);
+            color: #71767b;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        #close-panel {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #71767b;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        #close-panel:hover { color: #e7e9ea; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            #header {
+                padding: 10px 14px;
+            }
+            #header h1 { font-size: 0.95rem; }
+            #progress-badge { padding: 5px 10px; font-size: 0.7rem; }
+            
+            #legend {
+                bottom: 12px;
+                left: 12px;
+                padding: 10px 14px;
+            }
+
+            #info-panel {
+                bottom: 0;
+                right: 0;
+                left: 0;
+                max-width: none;
+                border-radius: 16px 16px 0 0;
+                transform: translateY(100%);
+            }
+
+            #info-panel.visible {
+                transform: translateY(0);
+            }
+        }
+
+        /* Leaflet overrides */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+        }
+        .leaflet-control-zoom a {
+            background: rgba(15, 20, 25, 0.9) !important;
+            color: #e7e9ea !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background: rgba(30, 40, 50, 0.95) !important;
+        }
+
+        /* Leg number markers */
+        .leg-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            border: 2px solid;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .leg-marker:hover {
+            transform: scale(1.3);
+        }
+
+        .leg-marker.completed {
+            background: #00ba7c;
+            border-color: #00ba7c;
+            color: #fff;
+            box-shadow: 0 0 8px rgba(0, 186, 124, 0.5);
+        }
+
+        .leg-marker.remaining {
+            background: rgba(15, 20, 25, 0.85);
+            border-color: #71767b;
+            color: #71767b;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div>
+            <h1>Sean's RTO Journey</h1>
+            <span class="subtitle">Reno-Tahoe Odyssey • 178-Mile Relay</span>
+        </div>
+        <div id="progress-badge">
+            <span class="count">12</span> / 36 legs
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="legend">
+        <h3>Legend</h3>
+        <div class="legend-item">
+            <div class="legend-line completed"></div>
+            <span>Completed</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line remaining"></div>
+            <span>Not yet run</span>
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <button id="close-panel">&times;</button>
+        <div id="panel-content"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data/legs.json" type="application/json" id="legs-data"></script>
+    <script>
+    // ============================================================
+    // RTO COURSE DATA
+    // All leg coordinates representing the approximate route
+    // The course goes counter-clockwise from Reno
+    // ============================================================
+    
+    const legCoordinates = {
+        1:  [[39.5296, -119.8138], [39.5180, -119.8650], [39.5120, -119.9100]],
+        2:  [[39.5120, -119.9100], [39.5080, -119.9400], [39.5050, -119.9700]],
+        3:  [[39.5050, -119.9700], [39.4980, -120.0000], [39.4850, -120.0300]],
+        4:  [[39.4850, -120.0300], [39.4500, -120.0600], [39.3900, -120.0800], [39.3280, -120.1830]],
+        5:  [[39.3280, -120.1830], [39.3250, -120.2100], [39.3230, -120.2400]],
+        6:  [[39.3230, -120.2400], [39.3200, -120.2300], [39.3150, -120.2000]],
+        7:  [[39.3150, -120.2000], [39.2900, -120.2100], [39.2500, -120.2200], [39.2100, -120.2350]],
+        8:  [[39.2100, -120.2350], [39.1900, -120.2100], [39.1680, -120.1430]],
+        9:  [[39.1680, -120.1430], [39.1400, -120.1600], [39.1100, -120.1700]],
+        10: [[39.1100, -120.1700], [39.0900, -120.1650], [39.0700, -120.1600]],
+        11: [[39.0700, -120.1600], [39.0500, -120.1500], [39.0300, -120.1200], [39.0000, -120.1000]],
+        12: [[39.0000, -120.1000], [38.9700, -120.0700], [38.9500, -120.0500], [38.9400, -120.0300]],
+        13: [[38.9400, -120.0300], [38.9500, -120.0000], [38.9550, -119.9800], [38.9570, -119.9600]],
+        14: [[38.9570, -119.9600], [38.9590, -119.9400], [38.9600, -119.9200], [38.9650, -119.9000]],
+        15: [[38.9650, -119.9000], [38.9700, -119.8800], [38.9800, -119.8600], [38.9900, -119.9400]],
+        16: [[38.9900, -119.9400], [39.0000, -119.9450], [39.0100, -119.9500]],
+        17: [[39.0100, -119.9500], [39.0200, -119.9450], [39.0350, -119.9400]],
+        18: [[39.0350, -119.9400], [39.0500, -119.9350], [39.0700, -119.9300], [39.0900, -119.9250]],
+        19: [[39.0900, -119.9250], [39.1050, -119.9200], [39.1100, -119.9100], [39.1200, -119.8950]],
+        20: [[39.1200, -119.8950], [39.1350, -119.8800], [39.1500, -119.8500], [39.1650, -119.7700]],
+        21: [[39.1650, -119.7700], [39.1700, -119.7600], [39.1750, -119.7500]],
+        22: [[39.1750, -119.7500], [39.1600, -119.7600], [39.1400, -119.7700], [39.1100, -119.7800], [39.0000, -119.8500]],
+        23: [[39.0000, -119.8500], [38.9800, -119.8400], [38.9600, -119.8200], [38.9500, -119.8000]],
+        24: [[38.9500, -119.8000], [38.9600, -119.7800], [38.9700, -119.7700]],
+        25: [[38.9700, -119.7700], [38.9800, -119.7650], [38.9900, -119.7600]],
+        26: [[38.9900, -119.7600], [39.0100, -119.7400], [39.0300, -119.7200], [39.0600, -119.6800]],
+        27: [[39.0600, -119.6800], [39.0800, -119.6600], [39.1000, -119.6500]],
+        28: [[39.1000, -119.6500], [39.1200, -119.6400], [39.1500, -119.6300], [39.3100, -119.6500]],
+        29: [[39.3100, -119.6500], [39.3200, -119.6400], [39.3300, -119.6350]],
+        30: [[39.3300, -119.6350], [39.3500, -119.6500], [39.3700, -119.6700]],
+        31: [[39.3700, -119.6700], [39.3900, -119.6900], [39.4100, -119.7100]],
+        32: [[39.4100, -119.7100], [39.4300, -119.7200], [39.4500, -119.7400]],
+        33: [[39.4500, -119.7400], [39.4700, -119.7500], [39.4900, -119.7600], [39.5000, -119.7700]],
+        34: [[39.5000, -119.7700], [39.5100, -119.7800], [39.5200, -119.7900], [39.5250, -119.8000]],
+        35: [[39.5250, -119.8000], [39.5280, -119.8100], [39.5300, -119.8200], [39.5310, -119.8300]],
+        36: [[39.5310, -119.8300], [39.5300, -119.8200], [39.5296, -119.8138]]
+    };
+
+    // ============================================================
+    // LEG DATA (from RTO course info)
+    // ============================================================
+    const legs = [
+        { leg: 1, miles: 4.9, rating: "E", runner: 1, description: "Reno to Verdi" },
+        { leg: 2, miles: 4.4, rating: "M", runner: 2, description: "Verdi to Boomtown" },
+        { leg: 3, miles: 5.5, rating: "M", runner: 3, description: "Boomtown to Dog Valley Rd" },
+        { leg: 4, miles: 8.0, rating: "MD", runner: 4, description: "Dog Valley Rd to Truckee" },
+        { leg: 5, miles: 5.6, rating: "M", runner: 5, description: "Truckee to Donner Lake" },
+        { leg: 6, miles: 5.4, rating: "E", runner: 6, description: "Donner Lake to Truckee River" },
+        { leg: 7, miles: 7.4, rating: "MC", runner: 7, description: "Truckee to Squaw Valley Rd" },
+        { leg: 8, miles: 4.0, rating: "M", runner: 8, description: "Squaw Valley Rd to Tahoe City" },
+        { leg: 9, miles: 5.3, rating: "M", runner: 9, description: "Tahoe City to Homewood" },
+        { leg: 10, miles: 4.8, rating: "M", runner: 10, description: "Homewood to Tahoma" },
+        { leg: 11, miles: 5.2, rating: "M", runner: 11, description: "Tahoma to Emerald Bay" },
+        { leg: 12, miles: 6.2, rating: "M", runner: 12, description: "Emerald Bay to Camp Richardson" },
+        { leg: 13, miles: 6.2, rating: "M", runner: 1, description: "Camp Richardson to South Lake Tahoe" },
+        { leg: 14, miles: 6.2, rating: "MD", runner: 2, description: "South Lake Tahoe to Stateline" },
+        { leg: 15, miles: 5.5, rating: "MC", runner: 3, description: "Stateline to Round Hill" },
+        { leg: 16, miles: 3.4, rating: "E", runner: 4, description: "Round Hill to Zephyr Cove" },
+        { leg: 17, miles: 3.3, rating: "E", runner: 5, description: "Zephyr Cove to Cave Rock" },
+        { leg: 18, miles: 4.6, rating: "E", runner: 6, description: "Cave Rock to Glenbrook" },
+        { leg: 19, miles: 3.8, rating: "MD", runner: 7, description: "Glenbrook to Spooner Summit" },
+        { leg: 20, miles: 3.7, rating: "M", runner: 8, description: "Spooner Summit to Carson City" },
+        { leg: 21, miles: 3.7, rating: "M", runner: 9, description: "Carson City (Hwy 50)" },
+        { leg: 22, miles: 5.7, rating: "M", runner: 10, description: "Carson City to Genoa" },
+        { leg: 23, miles: 6.1, rating: "M", runner: 11, description: "Genoa to Jacks Valley" },
+        { leg: 24, miles: 3.2, rating: "E", runner: 12, description: "Jacks Valley to Carson City" },
+        { leg: 25, miles: 3.4, rating: "E", runner: 1, description: "Carson City (Capital Odyssey Start)" },
+        { leg: 26, miles: 5.5, rating: "M", runner: 2, description: "Carson City to Silver City" },
+        { leg: 27, miles: 3.9, rating: "M", runner: 3, description: "Silver City to Gold Hill" },
+        { leg: 28, miles: 4.8, rating: "M", runner: 4, description: "Gold Hill to Virginia City" },
+        { leg: 29, miles: 3.4, rating: "MC", runner: 5, description: "Virginia City to Geiger Grade" },
+        { leg: 30, miles: 3.4, rating: "MD", runner: 6, description: "Geiger Grade descent" },
+        { leg: 31, miles: 2.6, rating: "MD", runner: 7, description: "Geiger Grade to Steamboat" },
+        { leg: 32, miles: 3.3, rating: "MD", runner: 8, description: "Steamboat to Pleasant Valley" },
+        { leg: 33, miles: 6.6, rating: "MC", runner: 9, description: "Pleasant Valley to South Reno" },
+        { leg: 34, miles: 5.1, rating: "M", runner: 10, description: "South Reno to Moana Lane" },
+        { leg: 35, miles: 6.9, rating: "MC", runner: 11, description: "Moana Lane to Midtown Reno" },
+        { leg: 36, miles: 4.2, rating: "M", runner: 12, description: "Midtown Reno to Finish" }
+    ];
+
+    // ============================================================
+    // COMPLETED LEGS - Edit this array to add new completed legs!
+    // ============================================================
+    const completedLegs = [
+        { leg: 7,  year: 2022, pace: "7:58/mi" },
+        { leg: 19, year: 2022, pace: "9:43/mi" },
+        { leg: 31, year: 2022, pace: "9:59/mi" },
+        { leg: 4,  year: 2023, pace: "9:14/mi" },
+        { leg: 16, year: 2023, pace: "6:48/mi" },
+        { leg: 28, year: 2023, pace: "7:32/mi" },
+        { leg: 2,  year: 2024, pace: "6:58/mi" },
+        { leg: 14, year: 2024, pace: "7:31/mi" },
+        { leg: 26, year: 2024, pace: "7:07/mi" },
+        { leg: 10, year: 2026, pace: "7:08/mi" },
+        { leg: 22, year: 2026, pace: "7:00/mi" },
+        { leg: 34, year: 2026, pace: "6:55/mi" }
+    ];
+
+    // Build lookup
+    const completedMap = {};
+    completedLegs.forEach(c => { completedMap[c.leg] = c; });
+
+    // Rating labels
+    const ratingLabels = {
+        "E": "Easy",
+        "M": "Moderate",
+        "MC": "More Challenging",
+        "MD": "Most Difficult"
+    };
+
+    // ============================================================
+    // MAP INITIALIZATION
+    // ============================================================
+    const map = L.map('map', {
+        center: [39.15, -119.95],
+        zoom: 10,
+        zoomControl: true,
+        attributionControl: true
+    });
+
+    // Satellite hybrid tile layer (Esri)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 18
+    }).addTo(map);
+
+    // Add labels overlay
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        opacity: 0.6
+    }).addTo(map);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        opacity: 0.7
+    }).addTo(map);
+
+    // ============================================================
+    // DRAW COURSE LEGS
+    // ============================================================
+    const legLayers = {};
+
+    legs.forEach(legData => {
+        const coords = legCoordinates[legData.leg];
+        if (!coords) return;
+
+        const isCompleted = !!completedMap[legData.leg];
+        
+        // Draw the polyline
+        const polyline = L.polyline(coords, {
+            color: isCompleted ? '#00ba7c' : '#71767b',
+            weight: isCompleted ? 5 : 3,
+            opacity: isCompleted ? 0.9 : 0.4,
+            lineCap: 'round',
+            lineJoin: 'round'
+        }).addTo(map);
+
+        // Add glow effect for completed legs
+        if (isCompleted) {
+            L.polyline(coords, {
+                color: '#00ba7c',
+                weight: 12,
+                opacity: 0.15,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+        }
+
+        // Calculate midpoint for marker
+        const midIdx = Math.floor(coords.length / 2);
+        const midPoint = coords[midIdx];
+
+        // Create numbered marker
+        const markerHtml = `<div class="leg-marker ${isCompleted ? 'completed' : 'remaining'}">${legData.leg}</div>`;
+        const marker = L.marker(midPoint, {
+            icon: L.divIcon({
+                html: markerHtml,
+                className: '',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            })
+        }).addTo(map);
+
+        // Click handler
+        marker.on('click', () => showLegInfo(legData.leg));
+        polyline.on('click', () => showLegInfo(legData.leg));
+
+        legLayers[legData.leg] = { polyline, marker };
+    });
+
+    // ============================================================
+    // INFO PANEL
+    // ============================================================
+    const infoPanel = document.getElementById('info-panel');
+    const panelContent = document.getElementById('panel-content');
+    const closeBtn = document.getElementById('close-panel');
+
+    closeBtn.addEventListener('click', () => {
+        infoPanel.classList.remove('visible');
+    });
+
+    // Close panel when clicking map
+    map.on('click', (e) => {
+        // Only close if not clicking a leg
+        if (!e.originalEvent.target.closest('.leg-marker')) {
+            infoPanel.classList.remove('visible');
+        }
+    });
+
+    function showLegInfo(legNum) {
+        const legData = legs.find(l => l.leg === legNum);
+        const completed = completedMap[legNum];
+
+        let html = '';
+
+        if (completed) {
+            html += `<div class="completed-badge">✓ Completed</div>`;
+        } else {
+            html += `<div class="not-completed-badge">○ Not yet run</div>`;
+        }
+
+        html += `<div class="leg-number">Leg ${legNum} • Runner #${legData.runner}</div>`;
+        html += `<div class="leg-title">${legData.description}</div>`;
+
+        html += `<div class="stats-grid">`;
+        html += `<div class="stat-item"><div class="label">Distance</div><div class="value">${legData.miles} mi</div></div>`;
+        html += `<div class="stat-item"><div class="label">Difficulty</div><div class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></div></div>`;
+
+        if (completed) {
+            html += `<div class="stat-item"><div class="label">Pace</div><div class="value pace">${completed.pace}</div></div>`;
+            html += `<div class="stat-item"><div class="label">Year</div><div class="value year">${completed.year}</div></div>`;
+        }
+
+        html += `</div>`;
+
+        panelContent.innerHTML = html;
+        infoPanel.classList.add('visible');
+    }
+
+    // Update progress count
+    document.querySelector('#progress-badge .count').textContent = completedLegs.length;
+    </script>
+</body>
+</html>
