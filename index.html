@@ -185,46 +185,46 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: #6b7280;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         #info-panel .leg-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             color: #f9fafb;
         }
 
-        #info-panel .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        /* Single compact row of stats */
+        #info-panel .stats-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .stat-item {
+        .stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            padding: 10px 12px;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.72rem;
         }
 
-        .stat-item .label {
-            font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+        .stat-chip .label {
             color: #6b7280;
-            margin-bottom: 3px;
             font-weight: 500;
         }
 
-        .stat-item .value {
-            font-size: 0.95rem;
+        .stat-chip .value {
             font-weight: 600;
             color: #e5e7eb;
         }
 
-        .stat-item .value.pace { color: #47aa43; }
-        .stat-item .value.year { color: #1ebbf0; }
+        .stat-chip .value.pace { color: #47aa43; }
+        .stat-chip .value.year { color: #1ebbf0; }
 
         .rating-badge {
             display: inline-block;
@@ -240,31 +240,35 @@
         .rating-MD { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
 
         .completed-badge {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(71, 170, 67, 0.12);
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background: rgba(71, 170, 67, 0.1);
             border: 1px solid rgba(71, 170, 67, 0.3);
             color: #47aa43;
-            padding: 5px 12px;
-            border-radius: 14px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-bottom: 14px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
         .not-completed-badge {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(160, 174, 192, 0.1);
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background: rgba(160, 174, 192, 0.06);
             border: 1px solid rgba(160, 174, 192, 0.2);
             color: #a0aec0;
-            padding: 5px 12px;
-            border-radius: 14px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-bottom: 14px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
         /* Elevation chart */
@@ -344,19 +348,32 @@
 
         /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            #header { padding: 10px 14px 6px; }
-            #header h1 { font-size: 1.6rem; }
-            .header-logo { height: 30px; }
-            #legend { bottom: 12px; left: 12px; padding: 10px 14px; }
+            #header { padding: 6px 12px 5px; }
+            #header h1 { font-size: 1.3rem; }
+            #header .subtitle { font-size: 0.6rem; margin-top: 0; }
+            .header-top { margin-bottom: 5px; }
+            .header-logo { height: 24px; }
+            #progress-bar-container { gap: 8px; }
+            #progress-bar-track { height: 4px; }
+            #progress-label { font-size: 0.6rem; }
+            #legend { bottom: 10px; left: 10px; padding: 8px 12px; font-size: 0.65rem; }
+            #legend h3 { margin-bottom: 6px; }
             #info-panel {
                 bottom: 0; right: 0; left: 0;
                 max-width: none;
-                border-radius: 16px 16px 0 0;
+                border-radius: 14px 14px 0 0;
                 transform: translateY(100%);
-                max-height: 60vh;
+                max-height: 52vh;
                 overflow-y: auto;
+                padding: 16px 16px;
             }
             #info-panel.visible { transform: translateY(0); }
+            #info-panel .leg-title { font-size: 1rem; margin-bottom: 8px; }
+            .completed-badge, .not-completed-badge { padding: 6px 10px; font-size: 0.75rem; margin-bottom: 8px; }
+            .stat-chip { padding: 4px 8px; font-size: 0.65rem; }
+            .elevation-container { margin-top: 10px; padding-top: 10px; }
+            .elevation-chart { height: 55px; }
+            #zoom-out-btn { margin-top: 10px; padding: 8px 12px; font-size: 0.7rem; }
         }
 
         /* ===== LEAFLET OVERRIDES ===== */
@@ -628,10 +645,15 @@
         const completed = completedMap[legNum];
         const coords = getLegCoords(legNum);
 
-        // Zoom to this leg
+        // Zoom to this leg - adjust padding based on screen size
         if (coords && coords.length > 0) {
             const legBounds = L.latLngBounds(coords);
-            map.flyToBounds(legBounds, { padding: [100, 380, 100, 100], maxZoom: 14, duration: 0.6 });
+            const isMobile = window.innerWidth <= 768;
+            // On mobile: pad top for header, bottom for panel; on desktop: pad right for panel
+            const padOpts = isMobile
+                ? { padding: [60, 30, 30, 30], maxZoom: 14, duration: 0.6 }
+                : { padding: [100, 380, 100, 100], maxZoom: 14, duration: 0.6 };
+            map.flyToBounds(legBounds, padOpts);
             isZoomedIn = true;
             zoomOutBtn.style.display = 'block';
         }
@@ -647,12 +669,12 @@
 
         html += `<div class="leg-number">Leg ${legNum} • Runner #${legData.runner}</div>`;
         html += `<div class="leg-title">${legData.description}</div>`;
-        html += `<div class="stats-grid">`;
-        html += `<div class="stat-item"><div class="label">Distance</div><div class="value">${legData.miles} mi</div></div>`;
-        html += `<div class="stat-item"><div class="label">Difficulty</div><div class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></div></div>`;
+        html += `<div class="stats-row">`;
+        html += `<div class="stat-chip"><span class="label">Dist</span><span class="value">${legData.miles} mi</span></div>`;
+        html += `<div class="stat-chip"><span class="label">Diff</span><span class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></span></div>`;
 
         if (completed) {
-            html += `<div class="stat-item"><div class="label">Pace</div><div class="value pace">${completed.pace}</div></div>`;
+            html += `<div class="stat-chip"><span class="label">Pace</span><span class="value pace">${completed.pace}</span></div>`;
         }
 
         html += `</div>`;
