@@ -61,10 +61,7 @@
             letter-spacing: 0.03em;
         }
 
-        .header-logo {
-            height: 40px;
-            opacity: 0.85;
-        }
+        .header-logo { height: 40px; opacity: 0.85; }
 
         /* ===== PROGRESS BAR ===== */
         #progress-bar-container {
@@ -97,24 +94,18 @@
             font-weight: 500;
         }
 
-        #progress-label span {
-            color: #47aa43;
-            font-weight: 700;
-        }
+        #progress-label span { color: #47aa43; font-weight: 700; }
 
         /* ===== MAP ===== */
         #map {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1;
         }
 
-        /* Darken ONLY the tile layers, not the SVG overlays (polylines/markers) */
+        /* Mute satellite tiles - lighter than before */
         .leaflet-tile-pane {
-            filter: brightness(0.6) saturate(0.7);
+            filter: brightness(0.78) saturate(0.75);
         }
 
         /* ===== LEGEND ===== */
@@ -160,9 +151,7 @@
             background: #47aa43; 
             box-shadow: 0 0 8px rgba(71, 170, 67, 0.6);
         }
-        .legend-line.remaining { 
-            background: #c8d6e5;
-        }
+        .legend-line.remaining { background: #c8d6e5; }
 
         /* ===== INFO PANEL ===== */
         #info-panel {
@@ -176,8 +165,8 @@
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px;
             padding: 22px 24px;
-            min-width: 290px;
-            max-width: 340px;
+            min-width: 300px;
+            max-width: 360px;
             transform: translateY(12px);
             opacity: 0;
             pointer-events: none;
@@ -278,6 +267,66 @@
             margin-bottom: 14px;
         }
 
+        /* Elevation chart */
+        .elevation-container {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .elevation-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .elevation-chart {
+            width: 100%;
+            height: 70px;
+            position: relative;
+        }
+
+        .elevation-chart canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .elevation-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 0.6rem;
+            color: #6b7280;
+        }
+
+        /* Zoom out button */
+        #zoom-out-btn {
+            display: none;
+            margin-top: 14px;
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            color: #d1d5db;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #zoom-out-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
         #close-panel {
             position: absolute;
             top: 14px;
@@ -304,6 +353,8 @@
                 max-width: none;
                 border-radius: 16px 16px 0 0;
                 transform: translateY(100%);
+                max-height: 60vh;
+                overflow-y: auto;
             }
             #info-panel.visible { transform: translateY(0); }
         }
@@ -382,10 +433,12 @@
     <div id="info-panel">
         <button id="close-panel">&times;</button>
         <div id="panel-content"></div>
+        <button id="zoom-out-btn">← Back to full course</button>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="data/routes.js"></script>
+    <script src="data/elevations.js"></script>
     <script>
     // ============================================================
     // COMPLETED LEGS - Edit this array to add new completed legs!
@@ -448,7 +501,7 @@
         { leg: 36, miles: 4.2, rating: "M", runner: 12, description: "Midtown Reno to Finish" }
     ];
 
-    // Build lookup
+    // Build lookups
     const completedMap = {};
     completedLegs.forEach(c => { completedMap[c.leg] = c; });
     const ratingLabels = { "E": "Easy", "M": "Moderate", "MC": "More Challenging", "MD": "Most Difficult" };
@@ -471,7 +524,7 @@
     }).addTo(map);
 
     // ============================================================
-    // DRAW LEGS - with white outline for pop
+    // DRAW LEGS
     // ============================================================
     function getLegCoords(legNum) {
         if (typeof gpxRoutes !== 'undefined' && gpxRoutes[legNum]) return gpxRoutes[legNum];
@@ -479,16 +532,15 @@
     }
 
     const allCoords = [];
+    let courseBounds;
 
-    // Draw in two passes: first all outlines, then all colored lines on top
-    // Pass 1: White outlines (border effect)
+    // Pass 1: White outlines
     legs.forEach(legData => {
         const coords = getLegCoords(legData.leg);
         if (!coords || coords.length === 0) return;
         const isCompleted = !!completedMap[legData.leg];
         allCoords.push(...coords);
 
-        // White outline (thicker, underneath)
         L.polyline(coords, {
             color: '#ffffff',
             weight: isCompleted ? 14 : 10,
@@ -499,34 +551,28 @@
         }).addTo(map);
     });
 
-    // Pass 2: Colored lines and glow on top
+    // Pass 2: Colored lines
     legs.forEach(legData => {
         const coords = getLegCoords(legData.leg);
         if (!coords || coords.length === 0) return;
         const isCompleted = !!completedMap[legData.leg];
 
-        // Green glow for completed
         if (isCompleted) {
             L.polyline(coords, {
                 color: '#47aa43',
                 weight: 20,
                 opacity: 0.15,
-                lineCap: 'round',
-                lineJoin: 'round',
-                interactive: false
+                lineCap: 'round', lineJoin: 'round', interactive: false
             }).addTo(map);
         }
 
-        // Main colored line - THICK
         const polyline = L.polyline(coords, {
             color: isCompleted ? '#5cd658' : '#c8d6e5',
             weight: isCompleted ? 9 : 7,
             opacity: isCompleted ? 1 : 0.85,
-            lineCap: 'round',
-            lineJoin: 'round'
+            lineCap: 'round', lineJoin: 'round'
         }).addTo(map);
 
-        // Marker at midpoint
         const midIdx = Math.floor(coords.length / 2);
         const midPoint = coords[midIdx];
         const markerHtml = `<div class="leg-marker ${isCompleted ? 'completed' : 'remaining'}">${legData.leg}</div>`;
@@ -535,42 +581,167 @@
             zIndexOffset: isCompleted ? 100 : 0
         }).addTo(map);
 
-        marker.on('click', () => showLegInfo(legData.leg));
-        polyline.on('click', () => showLegInfo(legData.leg));
+        marker.on('click', (e) => { L.DomEvent.stopPropagation(e); showLegInfo(legData.leg); });
+        polyline.on('click', (e) => { L.DomEvent.stopPropagation(e); showLegInfo(legData.leg); });
     });
 
-    // Fit bounds to course
+    // Fit bounds
     if (allCoords.length > 0) {
-        map.fitBounds(L.latLngBounds(allCoords), { padding: [80, 80], maxZoom: 11 });
+        courseBounds = L.latLngBounds(allCoords);
+        map.fitBounds(courseBounds, { padding: [80, 80], maxZoom: 11 });
     }
 
     // ============================================================
-    // INFO PANEL
+    // INFO PANEL + ZOOM
     // ============================================================
     const infoPanel = document.getElementById('info-panel');
     const panelContent = document.getElementById('panel-content');
-    document.getElementById('close-panel').addEventListener('click', () => infoPanel.classList.remove('visible'));
-    map.on('click', () => infoPanel.classList.remove('visible'));
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    let isZoomedIn = false;
+
+    document.getElementById('close-panel').addEventListener('click', () => {
+        infoPanel.classList.remove('visible');
+        zoomBackOut();
+    });
+
+    zoomOutBtn.addEventListener('click', () => {
+        infoPanel.classList.remove('visible');
+        zoomBackOut();
+    });
+
+    map.on('click', () => {
+        if (!isZoomedIn) {
+            infoPanel.classList.remove('visible');
+        }
+    });
+
+    function zoomBackOut() {
+        if (courseBounds) {
+            map.flyToBounds(courseBounds, { padding: [80, 80], maxZoom: 11, duration: 0.8 });
+        }
+        isZoomedIn = false;
+        zoomOutBtn.style.display = 'none';
+    }
 
     function showLegInfo(legNum) {
         const legData = legs.find(l => l.leg === legNum);
         const completed = completedMap[legNum];
+        const coords = getLegCoords(legNum);
+
+        // Zoom to this leg
+        if (coords && coords.length > 0) {
+            const legBounds = L.latLngBounds(coords);
+            map.flyToBounds(legBounds, { padding: [100, 380, 100, 100], maxZoom: 14, duration: 0.6 });
+            isZoomedIn = true;
+            zoomOutBtn.style.display = 'block';
+        }
+
+        // Build panel content
         let html = '';
-        html += completed
-            ? `<div class="completed-badge">✓ Completed</div>`
-            : `<div class="not-completed-badge">○ Not yet run</div>`;
+
+        if (completed) {
+            html += `<div class="completed-badge">✓ Completed in ${completed.year}</div>`;
+        } else {
+            html += `<div class="not-completed-badge">○ Not yet run</div>`;
+        }
+
         html += `<div class="leg-number">Leg ${legNum} • Runner #${legData.runner}</div>`;
         html += `<div class="leg-title">${legData.description}</div>`;
         html += `<div class="stats-grid">`;
         html += `<div class="stat-item"><div class="label">Distance</div><div class="value">${legData.miles} mi</div></div>`;
         html += `<div class="stat-item"><div class="label">Difficulty</div><div class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></div></div>`;
+
         if (completed) {
             html += `<div class="stat-item"><div class="label">Pace</div><div class="value pace">${completed.pace}</div></div>`;
-            html += `<div class="stat-item"><div class="label">Year</div><div class="value year">${completed.year}</div></div>`;
         }
+
         html += `</div>`;
+
+        // Elevation profile
+        if (typeof legElevations !== 'undefined' && legElevations[legNum]) {
+            const elev = legElevations[legNum];
+            const minElev = Math.min(...elev);
+            const maxElev = Math.max(...elev);
+            const gainFt = Math.round((maxElev - elev[0]) * 3.281);
+            const elevChangeFt = Math.round((elev[elev.length - 1] - elev[0]) * 3.281);
+
+            html += `<div class="elevation-container">`;
+            html += `<div class="elevation-label">Elevation Profile</div>`;
+            html += `<div class="elevation-chart"><canvas id="elev-canvas"></canvas></div>`;
+            html += `<div class="elevation-stats">`;
+            html += `<span>${Math.round(minElev * 3.281).toLocaleString()} ft</span>`;
+            html += `<span>↑ ${Math.round((maxElev - minElev) * 3.281).toLocaleString()} ft gain</span>`;
+            html += `<span>${Math.round(maxElev * 3.281).toLocaleString()} ft</span>`;
+            html += `</div>`;
+            html += `</div>`;
+        }
+
         panelContent.innerHTML = html;
         infoPanel.classList.add('visible');
+
+        // Draw elevation chart after DOM update
+        if (typeof legElevations !== 'undefined' && legElevations[legNum]) {
+            requestAnimationFrame(() => drawElevationChart(legNum));
+        }
+    }
+
+    function drawElevationChart(legNum) {
+        const canvas = document.getElementById('elev-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const elev = legElevations[legNum];
+        const isCompleted = !!completedMap[legNum];
+
+        // Set canvas resolution
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
+
+        const w = rect.width;
+        const h = rect.height;
+        const padding = 2;
+
+        const minE = Math.min(...elev);
+        const maxE = Math.max(...elev);
+        const range = maxE - minE || 1;
+
+        // Draw filled area
+        ctx.beginPath();
+        ctx.moveTo(padding, h - padding);
+
+        for (let i = 0; i < elev.length; i++) {
+            const x = padding + (i / (elev.length - 1)) * (w - 2 * padding);
+            const y = h - padding - ((elev[i] - minE) / range) * (h - 2 * padding);
+            ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(w - padding, h - padding);
+        ctx.closePath();
+
+        // Gradient fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, h);
+        if (isCompleted) {
+            gradient.addColorStop(0, 'rgba(71, 170, 67, 0.4)');
+            gradient.addColorStop(1, 'rgba(71, 170, 67, 0.05)');
+        } else {
+            gradient.addColorStop(0, 'rgba(200, 214, 229, 0.3)');
+            gradient.addColorStop(1, 'rgba(200, 214, 229, 0.05)');
+        }
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Draw line on top
+        ctx.beginPath();
+        for (let i = 0; i < elev.length; i++) {
+            const x = padding + (i / (elev.length - 1)) * (w - 2 * padding);
+            const y = h - padding - ((elev[i] - minE) / range) * (h - 2 * padding);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = isCompleted ? '#5cd658' : '#a0b4c8';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
     }
 
     // ============================================================
