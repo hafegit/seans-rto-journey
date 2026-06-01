@@ -12,7 +12,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f1419;
+            background: #0a0e13;
             color: #e7e9ea;
             overflow: hidden;
             height: 100vh;
@@ -25,11 +25,11 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(15, 20, 25, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 12px 20px;
+            background: rgba(10, 14, 19, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 14px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -39,25 +39,27 @@
             font-size: 1.1rem;
             font-weight: 600;
             letter-spacing: -0.02em;
+            color: #f0f0f0;
         }
 
         #header .subtitle {
-            font-size: 0.75rem;
-            color: #71767b;
+            font-size: 0.72rem;
+            color: #6b7280;
             font-weight: 400;
+            margin-top: 1px;
         }
 
         #progress-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(29, 155, 240, 0.1);
-            border: 1px solid rgba(29, 155, 240, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
             border-radius: 20px;
             padding: 6px 14px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 500;
-            color: #1d9bf0;
+            color: #10b981;
         }
 
         #progress-badge .count {
@@ -74,44 +76,63 @@
             z-index: 1;
         }
 
+        /* Dark overlay on the satellite imagery */
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 10, 18, 0.55);
+            z-index: 2;
+            pointer-events: none;
+        }
+
         /* Legend */
         #legend {
             position: fixed;
             bottom: 20px;
             left: 20px;
             z-index: 1000;
-            background: rgba(15, 20, 25, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(10, 14, 19, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 12px;
             padding: 14px 18px;
             font-size: 0.75rem;
         }
 
         #legend h3 {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #71767b;
-            margin-bottom: 8px;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+            margin-bottom: 10px;
+            font-weight: 500;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 5px;
+            gap: 10px;
+            margin-bottom: 6px;
+            color: #9ca3af;
         }
 
         .legend-line {
-            width: 24px;
+            width: 28px;
             height: 4px;
             border-radius: 2px;
         }
 
-        .legend-line.completed { background: #00ba7c; }
-        .legend-line.remaining { background: #71767b; opacity: 0.6; }
+        .legend-line.completed { 
+            background: #10b981; 
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+        .legend-line.remaining { 
+            background: #4b5563; 
+        }
 
         /* Info Panel */
         #info-panel {
@@ -119,18 +140,19 @@
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            background: rgba(15, 20, 25, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(10, 14, 19, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
-            padding: 20px 24px;
-            min-width: 280px;
+            padding: 22px 24px;
+            min-width: 290px;
             max-width: 340px;
-            transform: translateY(10px);
+            transform: translateY(12px);
             opacity: 0;
             pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
         #info-panel.visible {
@@ -140,18 +162,19 @@
         }
 
         #info-panel .leg-number {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #71767b;
+            color: #6b7280;
             margin-bottom: 4px;
         }
 
         #info-panel .leg-title {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             letter-spacing: -0.01em;
+            color: #f9fafb;
         }
 
         #info-panel .stats-grid {
@@ -161,80 +184,83 @@
         }
 
         .stat-item {
-            background: rgba(255,255,255,0.04);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
             padding: 10px 12px;
         }
 
         .stat-item .label {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #71767b;
-            margin-bottom: 2px;
+            letter-spacing: 0.06em;
+            color: #6b7280;
+            margin-bottom: 3px;
+            font-weight: 500;
         }
 
         .stat-item .value {
             font-size: 0.95rem;
             font-weight: 600;
+            color: #e5e7eb;
         }
 
-        .stat-item .value.pace { color: #00ba7c; }
-        .stat-item .value.year { color: #1d9bf0; }
+        .stat-item .value.pace { color: #10b981; }
+        .stat-item .value.year { color: #60a5fa; }
 
         #info-panel .rating-badge {
             display: inline-block;
             padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
+            border-radius: 5px;
+            font-size: 0.68rem;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
-        .rating-E { background: rgba(0, 186, 124, 0.15); color: #00ba7c; }
-        .rating-M { background: rgba(29, 155, 240, 0.15); color: #1d9bf0; }
-        .rating-MC { background: rgba(255, 212, 0, 0.15); color: #ffd400; }
-        .rating-MD { background: rgba(249, 24, 128, 0.15); color: #f91880; }
+        .rating-E { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+        .rating-M { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
+        .rating-MC { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+        .rating-MD { background: rgba(244, 63, 94, 0.12); color: #fb7185; }
 
         .completed-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(0, 186, 124, 0.12);
-            border: 1px solid rgba(0, 186, 124, 0.3);
-            color: #00ba7c;
-            padding: 4px 10px;
-            border-radius: 12px;
+            gap: 5px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #10b981;
+            padding: 5px 12px;
+            border-radius: 14px;
             font-size: 0.7rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .not-completed-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(113, 118, 123, 0.12);
-            border: 1px solid rgba(113, 118, 123, 0.3);
-            color: #71767b;
-            padding: 4px 10px;
-            border-radius: 12px;
+            gap: 5px;
+            background: rgba(107, 114, 128, 0.1);
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            color: #6b7280;
+            padding: 5px 12px;
+            border-radius: 14px;
             font-size: 0.7rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         #close-panel {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 14px;
+            right: 14px;
             background: none;
             border: none;
-            color: #71767b;
+            color: #6b7280;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             padding: 4px;
             line-height: 1;
+            transition: color 0.15s;
         }
 
         #close-panel:hover { color: #e7e9ea; }
@@ -270,15 +296,25 @@
         /* Leaflet overrides */
         .leaflet-control-zoom {
             border: none !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
         }
         .leaflet-control-zoom a {
-            background: rgba(15, 20, 25, 0.9) !important;
-            color: #e7e9ea !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
+            background: rgba(10, 14, 19, 0.92) !important;
+            color: #d1d5db !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            backdrop-filter: blur(8px) !important;
         }
         .leaflet-control-zoom a:hover {
-            background: rgba(30, 40, 50, 0.95) !important;
+            background: rgba(20, 28, 38, 0.95) !important;
+            color: #f9fafb !important;
+        }
+        .leaflet-control-attribution {
+            background: rgba(10, 14, 19, 0.7) !important;
+            color: #6b7280 !important;
+            font-size: 10px !important;
+        }
+        .leaflet-control-attribution a {
+            color: #9ca3af !important;
         }
 
         /* Leg number markers */
@@ -286,32 +322,32 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
             border: 2px solid;
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .leg-marker:hover {
-            transform: scale(1.3);
+            transform: scale(1.4);
         }
 
         .leg-marker.completed {
-            background: #00ba7c;
-            border-color: #00ba7c;
+            background: #10b981;
+            border-color: #10b981;
             color: #fff;
-            box-shadow: 0 0 8px rgba(0, 186, 124, 0.5);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.2);
         }
 
         .leg-marker.remaining {
-            background: rgba(15, 20, 25, 0.85);
-            border-color: #71767b;
-            color: #71767b;
+            background: rgba(10, 14, 19, 0.8);
+            border-color: #4b5563;
+            color: #9ca3af;
         }
     </style>
 </head>
@@ -327,6 +363,7 @@
     </div>
 
     <div id="map"></div>
+    <div class="dark-overlay"></div>
 
     <div id="legend">
         <h3>Legend</h3>
@@ -346,52 +383,26 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="data/legs.json" type="application/json" id="legs-data"></script>
+    <script src="data/routes.js"></script>
     <script>
     // ============================================================
-    // RTO COURSE DATA
-    // All leg coordinates representing the approximate route
-    // The course goes counter-clockwise from Reno
+    // COMPLETED LEGS - Edit this array to add new completed legs!
+    // Format: { leg: NUMBER, year: YEAR, pace: "M:SS/mi" }
     // ============================================================
-    
-    const legCoordinates = {
-        1:  [[39.5296, -119.8138], [39.5180, -119.8650], [39.5120, -119.9100]],
-        2:  [[39.5120, -119.9100], [39.5080, -119.9400], [39.5050, -119.9700]],
-        3:  [[39.5050, -119.9700], [39.4980, -120.0000], [39.4850, -120.0300]],
-        4:  [[39.4850, -120.0300], [39.4500, -120.0600], [39.3900, -120.0800], [39.3280, -120.1830]],
-        5:  [[39.3280, -120.1830], [39.3250, -120.2100], [39.3230, -120.2400]],
-        6:  [[39.3230, -120.2400], [39.3200, -120.2300], [39.3150, -120.2000]],
-        7:  [[39.3150, -120.2000], [39.2900, -120.2100], [39.2500, -120.2200], [39.2100, -120.2350]],
-        8:  [[39.2100, -120.2350], [39.1900, -120.2100], [39.1680, -120.1430]],
-        9:  [[39.1680, -120.1430], [39.1400, -120.1600], [39.1100, -120.1700]],
-        10: [[39.1100, -120.1700], [39.0900, -120.1650], [39.0700, -120.1600]],
-        11: [[39.0700, -120.1600], [39.0500, -120.1500], [39.0300, -120.1200], [39.0000, -120.1000]],
-        12: [[39.0000, -120.1000], [38.9700, -120.0700], [38.9500, -120.0500], [38.9400, -120.0300]],
-        13: [[38.9400, -120.0300], [38.9500, -120.0000], [38.9550, -119.9800], [38.9570, -119.9600]],
-        14: [[38.9570, -119.9600], [38.9590, -119.9400], [38.9600, -119.9200], [38.9650, -119.9000]],
-        15: [[38.9650, -119.9000], [38.9700, -119.8800], [38.9800, -119.8600], [38.9900, -119.9400]],
-        16: [[38.9900, -119.9400], [39.0000, -119.9450], [39.0100, -119.9500]],
-        17: [[39.0100, -119.9500], [39.0200, -119.9450], [39.0350, -119.9400]],
-        18: [[39.0350, -119.9400], [39.0500, -119.9350], [39.0700, -119.9300], [39.0900, -119.9250]],
-        19: [[39.0900, -119.9250], [39.1050, -119.9200], [39.1100, -119.9100], [39.1200, -119.8950]],
-        20: [[39.1200, -119.8950], [39.1350, -119.8800], [39.1500, -119.8500], [39.1650, -119.7700]],
-        21: [[39.1650, -119.7700], [39.1700, -119.7600], [39.1750, -119.7500]],
-        22: [[39.1750, -119.7500], [39.1600, -119.7600], [39.1400, -119.7700], [39.1100, -119.7800], [39.0000, -119.8500]],
-        23: [[39.0000, -119.8500], [38.9800, -119.8400], [38.9600, -119.8200], [38.9500, -119.8000]],
-        24: [[38.9500, -119.8000], [38.9600, -119.7800], [38.9700, -119.7700]],
-        25: [[38.9700, -119.7700], [38.9800, -119.7650], [38.9900, -119.7600]],
-        26: [[38.9900, -119.7600], [39.0100, -119.7400], [39.0300, -119.7200], [39.0600, -119.6800]],
-        27: [[39.0600, -119.6800], [39.0800, -119.6600], [39.1000, -119.6500]],
-        28: [[39.1000, -119.6500], [39.1200, -119.6400], [39.1500, -119.6300], [39.3100, -119.6500]],
-        29: [[39.3100, -119.6500], [39.3200, -119.6400], [39.3300, -119.6350]],
-        30: [[39.3300, -119.6350], [39.3500, -119.6500], [39.3700, -119.6700]],
-        31: [[39.3700, -119.6700], [39.3900, -119.6900], [39.4100, -119.7100]],
-        32: [[39.4100, -119.7100], [39.4300, -119.7200], [39.4500, -119.7400]],
-        33: [[39.4500, -119.7400], [39.4700, -119.7500], [39.4900, -119.7600], [39.5000, -119.7700]],
-        34: [[39.5000, -119.7700], [39.5100, -119.7800], [39.5200, -119.7900], [39.5250, -119.8000]],
-        35: [[39.5250, -119.8000], [39.5280, -119.8100], [39.5300, -119.8200], [39.5310, -119.8300]],
-        36: [[39.5310, -119.8300], [39.5300, -119.8200], [39.5296, -119.8138]]
-    };
+    const completedLegs = [
+        { leg: 7,  year: 2022, pace: "7:58/mi" },
+        { leg: 19, year: 2022, pace: "9:43/mi" },
+        { leg: 31, year: 2022, pace: "9:59/mi" },
+        { leg: 4,  year: 2023, pace: "9:14/mi" },
+        { leg: 16, year: 2023, pace: "6:48/mi" },
+        { leg: 28, year: 2023, pace: "7:32/mi" },
+        { leg: 2,  year: 2024, pace: "6:58/mi" },
+        { leg: 14, year: 2024, pace: "7:31/mi" },
+        { leg: 26, year: 2024, pace: "7:07/mi" },
+        { leg: 10, year: 2026, pace: "7:08/mi" },
+        { leg: 22, year: 2026, pace: "7:00/mi" },
+        { leg: 34, year: 2026, pace: "6:55/mi" }
+    ];
 
     // ============================================================
     // LEG DATA (from RTO course info)
@@ -435,23 +446,32 @@
         { leg: 36, miles: 4.2, rating: "M", runner: 12, description: "Midtown Reno to Finish" }
     ];
 
-    // ============================================================
-    // COMPLETED LEGS - Edit this array to add new completed legs!
-    // ============================================================
-    const completedLegs = [
-        { leg: 7,  year: 2022, pace: "7:58/mi" },
-        { leg: 19, year: 2022, pace: "9:43/mi" },
-        { leg: 31, year: 2022, pace: "9:59/mi" },
-        { leg: 4,  year: 2023, pace: "9:14/mi" },
-        { leg: 16, year: 2023, pace: "6:48/mi" },
-        { leg: 28, year: 2023, pace: "7:32/mi" },
-        { leg: 2,  year: 2024, pace: "6:58/mi" },
-        { leg: 14, year: 2024, pace: "7:31/mi" },
-        { leg: 26, year: 2024, pace: "7:07/mi" },
-        { leg: 10, year: 2026, pace: "7:08/mi" },
-        { leg: 22, year: 2026, pace: "7:00/mi" },
-        { leg: 34, year: 2026, pace: "6:55/mi" }
-    ];
+    // Approximate coordinates for legs 14-36 (no GPX data yet)
+    const fallbackCoordinates = {
+        14: [[38.9570, -119.9600], [38.9580, -119.9500], [38.9590, -119.9400], [38.9600, -119.9300], [38.9620, -119.9200]],
+        15: [[38.9620, -119.9200], [38.9700, -119.9300], [38.9800, -119.9400], [38.9900, -119.9450]],
+        16: [[38.9900, -119.9450], [38.9950, -119.9470], [39.0050, -119.9490], [39.0100, -119.9500]],
+        17: [[39.0100, -119.9500], [39.0180, -119.9470], [39.0250, -119.9440], [39.0350, -119.9400]],
+        18: [[39.0350, -119.9400], [39.0500, -119.9350], [39.0650, -119.9300], [39.0800, -119.9260], [39.0900, -119.9250]],
+        19: [[39.0900, -119.9250], [39.0980, -119.9220], [39.1050, -119.9150], [39.1100, -119.9080], [39.1200, -119.8950]],
+        20: [[39.1200, -119.8950], [39.1300, -119.8800], [39.1400, -119.8600], [39.1550, -119.8200], [39.1650, -119.7700]],
+        21: [[39.1650, -119.7700], [39.1680, -119.7650], [39.1700, -119.7600], [39.1750, -119.7500]],
+        22: [[39.1750, -119.7500], [39.1600, -119.7550], [39.1400, -119.7650], [39.1100, -119.7800], [39.0800, -119.8000], [39.0000, -119.8500]],
+        23: [[39.0000, -119.8500], [38.9900, -119.8450], [38.9750, -119.8350], [38.9600, -119.8200], [38.9500, -119.8000]],
+        24: [[38.9500, -119.8000], [38.9550, -119.7900], [38.9600, -119.7800], [38.9700, -119.7700]],
+        25: [[38.9700, -119.7700], [38.9750, -119.7680], [38.9800, -119.7650], [38.9900, -119.7600]],
+        26: [[38.9900, -119.7600], [39.0050, -119.7450], [39.0200, -119.7300], [39.0400, -119.7100], [39.0600, -119.6800]],
+        27: [[39.0600, -119.6800], [39.0700, -119.6700], [39.0800, -119.6600], [39.1000, -119.6500]],
+        28: [[39.1000, -119.6500], [39.1200, -119.6450], [39.1400, -119.6400], [39.2000, -119.6450], [39.3100, -119.6500]],
+        29: [[39.3100, -119.6500], [39.3150, -119.6480], [39.3200, -119.6450], [39.3300, -119.6350]],
+        30: [[39.3300, -119.6350], [39.3400, -119.6450], [39.3500, -119.6550], [39.3700, -119.6700]],
+        31: [[39.3700, -119.6700], [39.3800, -119.6800], [39.3900, -119.6900], [39.4100, -119.7100]],
+        32: [[39.4100, -119.7100], [39.4200, -119.7150], [39.4350, -119.7250], [39.4500, -119.7400]],
+        33: [[39.4500, -119.7400], [39.4600, -119.7450], [39.4750, -119.7530], [39.4900, -119.7600], [39.5000, -119.7700]],
+        34: [[39.5000, -119.7700], [39.5080, -119.7760], [39.5150, -119.7830], [39.5200, -119.7900], [39.5250, -119.8000]],
+        35: [[39.5250, -119.8000], [39.5270, -119.8060], [39.5280, -119.8120], [39.5290, -119.8200], [39.5300, -119.8280]],
+        36: [[39.5300, -119.8280], [39.5295, -119.8220], [39.5290, -119.8180], [39.5282, -119.8179]]
+    };
 
     // Build lookup
     const completedMap = {};
@@ -469,59 +489,79 @@
     // MAP INITIALIZATION
     // ============================================================
     const map = L.map('map', {
-        center: [39.15, -119.95],
-        zoom: 10,
         zoomControl: true,
-        attributionControl: true
+        attributionControl: true,
+        zoomSnap: 0.25
     });
 
-    // Satellite hybrid tile layer (Esri)
+    // Satellite tile layer (Esri) - will be muted by CSS overlay
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri',
         maxZoom: 18
     }).addTo(map);
 
-    // Add labels overlay
+    // Subtle road labels
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
-        opacity: 0.6
+        opacity: 0.35
     }).addTo(map);
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
-        opacity: 0.7
+        opacity: 0.45
     }).addTo(map);
+
+    // ============================================================
+    // GET COORDINATES FOR A LEG (GPX if available, fallback otherwise)
+    // ============================================================
+    function getLegCoords(legNum) {
+        if (gpxRoutes[legNum]) {
+            return gpxRoutes[legNum];
+        }
+        return fallbackCoordinates[legNum] || [];
+    }
 
     // ============================================================
     // DRAW COURSE LEGS
     // ============================================================
-    const legLayers = {};
+    const allCoords = [];
 
     legs.forEach(legData => {
-        const coords = legCoordinates[legData.leg];
-        if (!coords) return;
+        const coords = getLegCoords(legData.leg);
+        if (!coords || coords.length === 0) return;
 
         const isCompleted = !!completedMap[legData.leg];
-        
-        // Draw the polyline
+        allCoords.push(...coords);
+
+        // Glow layer for completed legs (drawn first, underneath)
+        if (isCompleted) {
+            L.polyline(coords, {
+                color: '#10b981',
+                weight: 14,
+                opacity: 0.12,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false
+            }).addTo(map);
+
+            L.polyline(coords, {
+                color: '#10b981',
+                weight: 8,
+                opacity: 0.25,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false
+            }).addTo(map);
+        }
+
+        // Main route line
         const polyline = L.polyline(coords, {
-            color: isCompleted ? '#00ba7c' : '#71767b',
-            weight: isCompleted ? 5 : 3,
-            opacity: isCompleted ? 0.9 : 0.4,
+            color: isCompleted ? '#10b981' : '#6b7280',
+            weight: isCompleted ? 4.5 : 2.5,
+            opacity: isCompleted ? 1 : 0.5,
             lineCap: 'round',
             lineJoin: 'round'
         }).addTo(map);
-
-        // Add glow effect for completed legs
-        if (isCompleted) {
-            L.polyline(coords, {
-                color: '#00ba7c',
-                weight: 12,
-                opacity: 0.15,
-                lineCap: 'round',
-                lineJoin: 'round'
-            }).addTo(map);
-        }
 
         // Calculate midpoint for marker
         const midIdx = Math.floor(coords.length / 2);
@@ -533,17 +573,25 @@
             icon: L.divIcon({
                 html: markerHtml,
                 className: '',
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-            })
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            }),
+            zIndexOffset: isCompleted ? 100 : 0
         }).addTo(map);
 
-        // Click handler
+        // Click handlers
         marker.on('click', () => showLegInfo(legData.leg));
         polyline.on('click', () => showLegInfo(legData.leg));
-
-        legLayers[legData.leg] = { polyline, marker };
     });
+
+    // Fit map to show entire course
+    if (allCoords.length > 0) {
+        const bounds = L.latLngBounds(allCoords);
+        map.fitBounds(bounds, { 
+            padding: [60, 60],
+            maxZoom: 11
+        });
+    }
 
     // ============================================================
     // INFO PANEL
@@ -556,12 +604,8 @@
         infoPanel.classList.remove('visible');
     });
 
-    // Close panel when clicking map
-    map.on('click', (e) => {
-        // Only close if not clicking a leg
-        if (!e.originalEvent.target.closest('.leg-marker')) {
-            infoPanel.classList.remove('visible');
-        }
+    map.on('click', () => {
+        infoPanel.classList.remove('visible');
     });
 
     function showLegInfo(legNum) {
