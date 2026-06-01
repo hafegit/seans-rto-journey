@@ -195,11 +195,11 @@
             color: #f9fafb;
         }
 
-        /* Single compact row of stats */
+        /* Single compact row of stats - never wraps */
         #info-panel .stats-row {
             display: flex;
             gap: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .stat-chip {
@@ -211,6 +211,7 @@
             border-radius: 8px;
             padding: 5px 10px;
             font-size: 0.72rem;
+            white-space: nowrap;
         }
 
         .stat-chip .label {
@@ -228,10 +229,11 @@
 
         .rating-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 0.68rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .rating-E { background: rgba(71, 170, 67, 0.15); color: #6ee66a; }
@@ -521,7 +523,7 @@
     // Build lookups
     const completedMap = {};
     completedLegs.forEach(c => { completedMap[c.leg] = c; });
-    const ratingLabels = { "E": "Easy", "M": "Moderate", "MC": "More Challenging", "MD": "Most Difficult" };
+    const ratingLabels = { "E": "Easy", "M": "Moderate", "MC": "Challenging", "MD": "Hard" };
 
     // ============================================================
     // MAP
