@@ -378,6 +378,16 @@
             #zoom-out-btn { margin-top: 10px; padding: 8px 12px; font-size: 0.7rem; }
         }
 
+        /* ===== SELECTED LEG HIGHLIGHT ===== */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+
+        .leg-highlight {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
         /* ===== LEAFLET OVERRIDES ===== */
         .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important; }
         .leaflet-control-zoom a { background: rgba(15, 20, 25, 0.9) !important; color: #d1d5db !important; border: 1px solid rgba(255,255,255,0.08) !important; }
@@ -525,6 +535,9 @@
     completedLegs.forEach(c => { completedMap[c.leg] = c; });
     const ratingLabels = { "E": "Easy", "M": "Moderate", "MC": "Challenging", "MD": "Hard" };
 
+    // Highlight layer for selected leg
+    let highlightLayers = [];
+
     // ============================================================
     // MAP
     // ============================================================
@@ -620,6 +633,7 @@
 
     document.getElementById('close-panel').addEventListener('click', () => {
         infoPanel.classList.remove('visible');
+        clearHighlight();
         zoomBackOut();
     });
 
@@ -634,7 +648,13 @@
         }
     });
 
+    function clearHighlight() {
+        highlightLayers.forEach(layer => map.removeLayer(layer));
+        highlightLayers = [];
+    }
+
     function zoomBackOut() {
+        clearHighlight();
         if (courseBounds) {
             map.flyToBounds(courseBounds, { padding: [80, 80], maxZoom: 11, duration: 0.8 });
         }
@@ -645,13 +665,38 @@
     function showLegInfo(legNum) {
         const legData = legs.find(l => l.leg === legNum);
         const completed = completedMap[legNum];
+        const isCompleted = !!completed;
         const coords = getLegCoords(legNum);
 
-        // Zoom to this leg - adjust padding based on screen size
+        // Clear previous highlight and add new one
+        clearHighlight();
+
         if (coords && coords.length > 0) {
+            // Bright highlight outline behind the selected leg
+            const hlOuter = L.polyline(coords, {
+                color: '#ffffff',
+                weight: 18,
+                opacity: 0.6,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false,
+                className: 'leg-highlight'
+            }).addTo(map);
+
+            const hlInner = L.polyline(coords, {
+                color: isCompleted ? '#ffdd00' : '#00d4ff',
+                weight: 11,
+                opacity: 0.9,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false
+            }).addTo(map);
+
+            highlightLayers.push(hlOuter, hlInner);
+
+            // Zoom to this leg - adjust padding based on screen size
             const legBounds = L.latLngBounds(coords);
             const isMobile = window.innerWidth <= 768;
-            // On mobile: pad top for header, bottom for panel; on desktop: pad right for panel
             const padOpts = isMobile
                 ? { padding: [60, 30, 30, 30], maxZoom: 14, duration: 0.6 }
                 : { padding: [100, 380, 100, 100], maxZoom: 14, duration: 0.6 };
