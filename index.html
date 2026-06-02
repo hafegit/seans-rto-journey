@@ -771,6 +771,9 @@
         }
     }
 
+    // Difficulty ranking for each runner slot (1 = hardest, 12 = easiest)
+    const runnerRankings = { 1: 10, 2: 3, 3: 5, 4: 4, 5: 9, 6: 12, 7: 1, 8: 8, 9: 6, 10: 7, 11: 2, 12: 11 };
+
     function showRunnerLegs(runnerNum) {
         // Clear existing highlight
         clearHighlight();
@@ -815,10 +818,13 @@
         // Update info panel to show runner summary
         const totalMiles = runnerLegs.reduce((sum, l) => sum + l.miles, 0).toFixed(1);
         const legNums = runnerLegs.map(l => l.leg).join(', ');
+        const ranking = runnerRankings[runnerNum];
+        const rankSuffix = ranking === 1 ? 'st' : ranking === 2 ? 'nd' : ranking === 3 ? 'rd' : 'th';
         let html = `<div class="leg-header">Runner #${runnerNum}</div>`;
         html += `<div class="stats-row" style="margin-bottom: 10px;">`;
         html += `<div class="stat-chip"><span class="label">Legs</span><span class="value">${legNums}</span></div>`;
         html += `<div class="stat-chip"><span class="label">Total</span><span class="value">${totalMiles} mi</span></div>`;
+        html += `<div class="stat-chip"><span class="label">Difficulty</span><span class="value" style="color:#fbbf24;">${ranking}${rankSuffix} hardest</span></div>`;
         html += `</div>`;
 
         // Show each leg's details
