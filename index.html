@@ -182,19 +182,22 @@
             pointer-events: auto;
         }
 
-        #info-panel .leg-number {
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #6b7280;
-            margin-bottom: 3px;
-        }
-
-        #info-panel .leg-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+        #info-panel .leg-header {
+            font-size: 1.2rem;
+            font-weight: 700;
             margin-bottom: 10px;
             color: #f9fafb;
+        }
+
+        #info-panel .leg-header .runner-link {
+            color: #1ebbf0;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        #info-panel .leg-header .runner-link:hover {
+            color: #60d4f7;
+            text-decoration: underline;
         }
 
         /* Single compact row of stats - never wraps */
@@ -719,8 +722,7 @@
             html += `<div class="not-completed-badge">○ Not yet run</div>`;
         }
 
-        html += `<div class="leg-number">Leg ${legNum} • Runner #${legData.runner}</div>`;
-        html += `<div class="leg-title">${legData.description}</div>`;
+        html += `<div class="leg-header">Leg ${legNum} — <span class="runner-link" data-runner="${legData.runner}">Runner #${legData.runner}</span></div>`;
         html += `<div class="stats-row">`;
         html += `<div class="stat-chip"><span class="label">Dist</span><span class="value">${legData.miles} mi</span></div>`;
         html += `<div class="stat-chip"><span class="label">Diff</span><span class="value"><span class="rating-badge rating-${legData.rating}">${ratingLabels[legData.rating]}</span></span></div>`;
@@ -753,10 +755,89 @@
         panelContent.innerHTML = html;
         infoPanel.classList.add('visible');
 
+        // Runner link click handler
+        const runnerLink = panelContent.querySelector('.runner-link');
+        if (runnerLink) {
+            runnerLink.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const runnerNum = parseInt(runnerLink.dataset.runner);
+                showRunnerLegs(runnerNum);
+            });
+        }
+
         // Draw elevation chart after DOM update
         if (typeof legElevations !== 'undefined' && legElevations[legNum]) {
             requestAnimationFrame(() => drawElevationChart(legNum));
         }
+    }
+
+    function showRunnerLegs(runnerNum) {
+        // Clear existing highlight
+        clearHighlight();
+
+        // Find all legs for this runner
+        const runnerLegs = legs.filter(l => l.runner === runnerNum);
+
+        // Zoom out to full course
+        if (courseBounds) {
+            map.flyToBounds(courseBounds, { padding: [80, 80], maxZoom: 11, duration: 0.6 });
+        }
+        isZoomedIn = true;
+        zoomOutBtn.style.display = 'block';
+
+        // Highlight all 3 legs for this runner in yellow
+        runnerLegs.forEach(legData => {
+            const coords = getLegCoords(legData.leg);
+            if (!coords || coords.length === 0) return;
+
+            const hlOuter = L.polyline(coords, {
+                color: '#ffffff',
+                weight: 18,
+                opacity: 0.6,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false,
+                className: 'leg-highlight'
+            }).addTo(map);
+
+            const hlInner = L.polyline(coords, {
+                color: '#ffdd00',
+                weight: 11,
+                opacity: 0.9,
+                lineCap: 'round',
+                lineJoin: 'round',
+                interactive: false
+            }).addTo(map);
+
+            highlightLayers.push(hlOuter, hlInner);
+        });
+
+        // Update info panel to show runner summary
+        const totalMiles = runnerLegs.reduce((sum, l) => sum + l.miles, 0).toFixed(1);
+        const legNums = runnerLegs.map(l => l.leg).join(', ');
+        let html = `<div class="leg-header">Runner #${runnerNum}</div>`;
+        html += `<div class="stats-row" style="margin-bottom: 10px;">`;
+        html += `<div class="stat-chip"><span class="label">Legs</span><span class="value">${legNums}</span></div>`;
+        html += `<div class="stat-chip"><span class="label">Total</span><span class="value">${totalMiles} mi</span></div>`;
+        html += `</div>`;
+
+        // Show each leg's details
+        runnerLegs.forEach(legData => {
+            const completed = completedMap[legData.leg];
+            html += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.75rem;">`;
+            html += `<span style="font-weight:700; color:#ffdd00; width:42px;">Leg ${legData.leg}</span>`;
+            html += `<span style="color:#9ca3af;">${legData.miles} mi</span>`;
+            html += `<span class="rating-badge rating-${legData.rating}" style="font-size:0.6rem;">${ratingLabels[legData.rating]}</span>`;
+            if (completed) {
+                html += `<span style="color:#47aa43; font-weight:600; margin-left:auto;">${completed.pace}</span>`;
+            } else {
+                html += `<span style="color:#4b5563; margin-left:auto;">—</span>`;
+            }
+            html += `</div>`;
+        });
+
+        panelContent.innerHTML = html;
+        infoPanel.classList.add('visible');
     }
 
     function drawElevationChart(legNum) {
